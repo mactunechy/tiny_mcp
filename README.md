@@ -19,10 +19,10 @@ require 'tiny_mcp'
 class WeatherTool < TinyMCP::Tool
   name 'get_weather'
   desc 'Get current weather for a city'
-  arg :city, :string, 'City name'
-  opt :units, :string, 'Temperature units (celsius/fahrenheit)'
+  arg :city, :string, 'City name' # required
+  opt :units, :string, 'Temperature units (c/f)' # optional
 
-  def call(city:, units: 'celsius')
+  def call(city:, units: 'c')
     # Your implementation here
     "Weather in #{city}: 20°C, sunny"
   end
@@ -42,7 +42,7 @@ end
 TinyMCP.serve(WeatherTool, TimeTool)
 ```
 
-You can put this in a bin/mcp file for example, and make it executable:
+You can put this in a `bin/mcp` file for example, and make it executable:
 
 ```bash
 chmod +x bin/mcp
@@ -54,7 +54,7 @@ Then add it to Claude Code:
 claude mcp add my-mcp bin/mcp
 ```
 
-The server reads JSON-RPC requests from stdin and writes responses to stdout, making it compatible with MCP clients.
+The server reads JSON-RPC requests from stdin and writes responses to stdout.
 
 ## Development
 
