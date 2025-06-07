@@ -3,7 +3,7 @@
 require 'test_helper'
 require 'stringio'
 
-class TestTinyMCP < Minitest::Test
+class TinyMCPTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::TinyMCP::VERSION
   end
@@ -274,7 +274,7 @@ class TestTinyMCP < Minitest::Test
 
     assert response[:error]
     assert_equal(-32602, response[:error][:code])
-    assert_match(/Unknown_tool: nonexistent/, response[:error][:message])
+    assert_match(/Unknown tool: nonexistent/, response[:error][:message])
   end
 
   def test_tools_call_with_error
@@ -337,7 +337,8 @@ class TestTinyMCP < Minitest::Test
 
   def test_error_with_custom_message
     server = TinyMCP::Server.new
-    error = server.send(:error_for, { 'id' => 1 }, :internal, 'Custom error message')
+    error =
+      server.send(:error_for, { 'id' => 1 }, :internal, 'Custom error message')
 
     assert_equal(-32603, error[:error][:code])
     assert_equal 'Custom error message', error[:error][:message]
@@ -500,5 +501,170 @@ class TestTinyMCP < Minitest::Test
 
     response = server.send(:handle_request, request)
     assert_equal 'Received: value', response[:result][:content][0][:text]
+  end
+
+  # Multi-modal Content Tests
+  def test_tool_returning_array_of_content_items
+    multi_content_tool_class = Class.new(TinyMCP::Tool) do
+      name 'multi_content'
+      desc 'Returns multiple content items'
+      arg :content_type, :string, 'Type of content to return'
+
+      def call(content_type:)
+        case content_type
+        when 'multiple_text'
+          [
+            { type: 'text', text: 'First text item' },
+            { type: 'text', text: 'Second text item' },
+            { type: 'text', text: 'Third text item' }
+          ]
+        when 'mixed'
+          [
+            { type: 'text', text: 'Some text content' },
+            { type: 'image',
+              data: 'base64-encoded-image-data',
+              mimeType: 'image/png' },
+            { type: 'text', text: 'More text after image' }
+          ]
+        end
+      end
+    end
+
+    server = TinyMCP::Server.new(multi_content_tool_class)
+    
+    # Test multiple text content
+    request = {
+      'jsonrpc' => '2.0',
+      'id' => 1,
+      'method' => 'tools/call',
+      'params' => {
+        'name' => 'multi_content',
+        'arguments' => { 'content_type' => 'multiple_text' }
+      }
+    }
+
+    response = server.send(:handle_request, request)
+    content = response[:result][:content]
+    
+    assert_equal 3, content.length
+    assert_equal 'First text item', content[0][:text]
+    assert_equal 'Second text item', content[1][:text]
+    assert_equal 'Third text item', content[2][:text]
+    content.each { |item| assert_equal 'text', item[:type] }
+  end
+
+  def test_tool_returning_mixed_content_types
+    mixed_tool_class = Class.new(TinyMCP::Tool) do
+      name 'mixed_content'
+      desc 'Returns mixed content types'
+
+      def call
+        [
+          { type: 'text', text: 'Here is some text' },
+          { type: 'image',
+            mimeType: 'image/png',
+            data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42' \
+            'mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==' },
+          { type: 'text', text: 'And more text after the image' },
+          { type: 'resource',
+            uri: 'file:///path/to/resource.txt',
+            text: 'Resource reference' }
+        ]
+      end
+    end
+
+    server = TinyMCP::Server.new(mixed_tool_class)
+    request = {
+      'jsonrpc' => '2.0',
+      'id' => 1,
+      'method' => 'tools/call',
+      'params' => {
+        'name' => 'mixed_content',
+        'arguments' => {}
+      }
+    }
+
+    response = server.send(:handle_request, request)
+    content = response[:result][:content]
+    
+    assert_equal 4, content.length
+    
+    # Check text content
+    assert_equal 'text', content[0][:type]
+    assert_equal 'Here is some text', content[0][:text]
+    
+    # Check image content
+    assert_equal 'image', content[1][:type]
+    assert_equal 'image/png', content[1][:mimeType]
+    assert_equal 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42' \
+                 'mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+                 content[1][:data]
+    
+    # Check second text content
+    assert_equal 'text', content[2][:type]
+    assert_equal 'And more text after the image', content[2][:text]
+    
+    # Check resource content
+    assert_equal 'resource', content[3][:type]
+    assert_equal 'file:///path/to/resource.txt', content[3][:uri]
+    assert_equal 'Resource reference', content[3][:text]
+  end
+
+  def test_tool_returning_empty_array
+    empty_tool_class = Class.new(TinyMCP::Tool) do
+      name 'empty_content'
+      desc 'Returns empty content array'
+
+      def call
+        []
+      end
+    end
+
+    server = TinyMCP::Server.new(empty_tool_class)
+    request = {
+      'jsonrpc' => '2.0',
+      'id' => 1,
+      'method' => 'tools/call',
+      'params' => {
+        'name' => 'empty_content',
+        'arguments' => {}
+      }
+    }
+
+    response = server.send(:handle_request, request)
+    content = response[:result][:content]
+    
+    assert_equal [], content
+    assert_equal 0, content.length
+  end
+
+  def test_tool_returning_single_item_array
+    single_tool_class = Class.new(TinyMCP::Tool) do
+      name 'single_content'
+      desc 'Returns single content item in array'
+      arg :message, :string, 'Message to return'
+
+      def call(message:)
+        [{ type: 'text', text: message }]
+      end
+    end
+
+    server = TinyMCP::Server.new(single_tool_class)
+    request = {
+      'jsonrpc' => '2.0',
+      'id' => 1,
+      'method' => 'tools/call',
+      'params' => {
+        'name' => 'single_content',
+        'arguments' => { 'message' => 'Single item message' }
+      }
+    }
+
+    response = server.send(:handle_request, request)
+    content = response[:result][:content]
+    
+    assert_equal 1, content.length
+    assert_equal 'text', content[0][:type]
+    assert_equal 'Single item message', content[0][:text]
   end
 end

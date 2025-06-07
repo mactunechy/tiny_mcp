@@ -108,15 +108,17 @@ module TinyMCP
       tool = @tools.find { _1.class.mcp.name == name }
 
       if !tool
-        return error_for(request, :invalid_params, "Unknown_tool: #{name}")
+        return error_for(request, :invalid_params, "Unknown tool: #{name}")
       end
 
       args = request.dig('params', 'arguments')&.transform_keys(&:to_sym)
 
       begin
         result = tool.call(**args)
-        # TODO: Support other content types (ask claude code which ones).
-        response_for(request, content: [{ type: 'text', text: result.to_s }])
+
+        result.is_a?(Array) ?
+          response_for(request, content: result) :
+          response_for(request, content: [{ type: 'text', text: result.to_s }])
       rescue => e
         error_for(request, :internal, e.full_message(highlight: false))
       end

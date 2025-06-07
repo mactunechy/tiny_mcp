@@ -34,7 +34,7 @@ class TimeTool < TinyMCP::Tool
   opt :timezone, :string, 'Timezone name'
 
   def call(timezone: 'UTC')
-    Time.now.getlocal(timezone).to_s
+    Time.now.getlocal(timezone)
   end
 end
 
@@ -55,6 +55,40 @@ claude mcp add my-mcp bin/mcp
 ```
 
 The server reads JSON-RPC requests from stdin and writes responses to stdout.
+
+## Multiple results and different formats
+
+By default TinyMCP assumes you're returning `text` from your call function. If you want to return image, audio, or a bunch of different results, wrap your return value in an array, and TinyMCP will treat your return value as the whole `content` body.
+
+Don't forget that binary data such as images and audio needs to be Base64-encoded.
+
+```ruby
+require 'base64'
+
+class MultiModalTool < TinyMCP::Tool
+  name 'get_different_formats'
+  desc 'Get results in different formats'
+
+  def call
+    [
+      {
+        type: 'text',
+        data: 'This is a text response'
+      },
+      {
+        type: 'image',
+        mimeType: 'image/png',
+        data: Base64.strict_encode64(File.read('image.png', 'rb'))
+      },
+      {
+        type: 'audio',
+        mimeType: 'audio/mpeg',
+        data: Base64.strict_encode64(File.read('audio.mp3', 'rb'))
+      }
+    ]
+  end
+end
+```
 
 ## Development
 
