@@ -3,7 +3,11 @@
 require 'test_helper'
 require 'stringio'
 
+
+
 class TinyMCPTest < Minitest::Test
+  class TestToolClass < TinyMCP::Tool; end
+
   def test_that_it_has_a_version_number
     refute_nil ::TinyMCP::VERSION
   end
@@ -25,14 +29,14 @@ class TinyMCPTest < Minitest::Test
 
   # Definition Class Tests
   def test_definition_initialization
-    definition = TinyMCP::Definition.new
+    definition = TinyMCP::Definition.new('Foo')
     assert_equal [], definition.props
-    assert_nil definition.name
+    assert_equal 'Foo', definition.name
     assert_nil definition.desc
   end
 
   def test_definition_setting_attributes
-    definition = TinyMCP::Definition.new
+    definition = TinyMCP::Definition.new('Foo')
     definition.name = 'test_tool'
     definition.desc = 'A test tool'
 
@@ -41,8 +45,7 @@ class TinyMCPTest < Minitest::Test
   end
 
   def test_definition_adding_props
-    definition = TinyMCP::Definition.new
-    definition.name = 'calculator'
+    definition = TinyMCP::Definition.new('calculator')
     definition.desc = 'Basic calculator'
 
     prop1 = TinyMCP::Prop.new(:x, :number, 'First number', true)
@@ -57,8 +60,7 @@ class TinyMCPTest < Minitest::Test
   end
 
   def test_definition_to_h
-    definition = TinyMCP::Definition.new
-    definition.name = 'greet'
+    definition = TinyMCP::Definition.new('greet')
     definition.desc = 'Greets a person'
 
     definition.props << TinyMCP::Prop[:name, :string, 'Name to greet', true]
@@ -81,9 +83,12 @@ class TinyMCPTest < Minitest::Test
   end
 
   # Tool Base Class Tests
+  def test_tool_class_name
+    assert_equal 'TestToolClass', TestToolClass.mcp.name
+  end
+
   def test_tool_inheritance_creates_definition
     test_tool_class = Class.new(TinyMCP::Tool)
-
     assert_instance_of TinyMCP::Definition, test_tool_class.mcp
     refute_nil test_tool_class.mcp
   end

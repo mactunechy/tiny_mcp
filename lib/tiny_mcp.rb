@@ -11,7 +11,10 @@ module TinyMCP
 
   class Definition
     attr_accessor :name, :desc, :props
-    def initialize = @props = []
+    def initialize(name)
+      @name = name
+      @props = []
+    end
 
     def to_h
       {
@@ -29,7 +32,12 @@ module TinyMCP
   class Tool
     class << self
       attr_accessor :mcp
-      def inherited(base) = base.mcp = Definition.new
+      alias __modname name
+
+      def inherited(base)
+        base.mcp = Definition.new(base.__modname&.split('::')&.last)
+      end
+
       def name(string) = mcp.name = string
       def desc(string) = mcp.desc = string
       def arg(*args) = mcp.props << Prop[*args, true]

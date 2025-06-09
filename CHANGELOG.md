@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Make tool's name be the class name by default
+
 ## [0.2.0] - 2025-06-07
 
 - Add support for multi-result responses of any formats
