@@ -39,7 +39,7 @@ class TimeTool < TinyMCP::Tool
 end
 
 # Serve multiple tools
-TinyMCP.serve(WeatherTool, TimeTool)
+TinyMCP.serve(WeatherTool, TimeTool, server_name: 'my_tool')
 ```
 
 You can put this in a `bin/mcp` file for example, and make it executable:
@@ -73,17 +73,17 @@ class MultiModalTool < TinyMCP::Tool
     [
       {
         type: 'text',
-        data: 'This is a text response'
+        text: 'This is a text response'
       },
       {
         type: 'image',
         mimeType: 'image/png',
-        data: Base64.strict_encode64(File.read('image.png', 'rb'))
+        data: Base64.strict_encode64(File.binread('image.png'))
       },
       {
         type: 'audio',
         mimeType: 'audio/mpeg',
-        data: Base64.strict_encode64(File.read('audio.mp3', 'rb'))
+        data: Base64.strict_encode64(File.binread('audio.mp3'))
       }
     ]
   end
