@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+# Provides MCP for exploring pdf files.
+# Make sure you install mupdf and pdfgrep (e.g. `brew install mupdf pdfgrep`).
+
+require 'mupdf'
+require 'pdf-reader'
+require 'tiny_mcp'
+require 'base64'
+
+# Requires mupdf
+class PdfPageCount < TinyMCP::Tool
+  name 'PdfPageCount'
+  desc 'Get page count of pdf files'
+  arg :paths, :string,
+    'Paths to pdfs separated by semicolons (e.g. "foo/bar.pdf;foo/baz.pdf")'
+
+  def call(paths:)
+    paths.split(';').map { |path|
+      path.strip!
+      reader = MuPDF::Document.new(path)
+      "#{path}: #{reader.info.pages} pages"
+    }.join("\n")
+  end
+end
+
+# Requires pdfgrep
+class PdfSearch < TinyMCP::Tool
+  name 'PdfSearch'
+  desc 'Search PDF files for text using regular expressions. Returns pages ' \
+    'where the text was found.'
+
+  arg :path, :string, 'Path to the PDF file'
+  arg :regex, :string, 'Regular expression to search (e.g. "Chapter [0-9]+")'
+
+  def call(path:, regex:)
+    command = "pdfgrep --color never -inP #{regex.shellescape} #{path}"
+    output = `#{command}`
+    pages = output.split("\n").map { _1.split(':').first.to_i }.uniq
+    pages.any? ? "Found on pages: #{pages.join(',')}" : 'Nothing was found'
+  end
+end
+
+# Requires pdf-reader, mupdf
+class PdfRead < TinyMCP::Tool
+  name 'PdfRead'
+  desc 'Read PDF files. Use format="image" if the page might have images, ' \
+    'tables or diagrams.'
+
+  arg :filepath, :string, 'Path to the PDF file'
+  arg :pages, :string, 'List of pages to read (1-based, e.g. "1,2,5")'
+  opt :format, :string, 'Get pages as text or image (e.g. "text" vs "image")'
+
+  def call(filepath:, pages:, format: 'text')
+    format = format == 'image' ? 'image' : 'text'
+    pages = pages.split(',').map(&:to_i)
+
+    format == 'image' ?
+      read_images(filepath, pages) :
+      read_text(filepath, pages)
+  end
+
+  private
+
+  def read_text(path, pages)
+    reader = PDF::Reader.new(path)
+    pages.map { { type: 'text', text: reader.page(_1).text } }
+  end
+
+  def read_images(path, pages)
+    reader  = MuPDF::Document.new(path)
+    Dir.mktmpdir do |dir|
+      pages.map {
+        img = "#{dir}/page_#{_1}.png"
+        reader.draw(page: _1, format: 'png', path: img)
+        data = Base64.strict_encode64(File.binread(img))
+        { type: 'image', mimeType: 'image/png', data: data }
+      }
+    end
+  end
+end
+
+TinyMCP.serve(PdfPageCount, PdfSearch, PdfRead, server_name: 'pdf-mcp')

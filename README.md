@@ -56,6 +56,8 @@ claude mcp add my-mcp bin/mcp
 
 The server reads JSON-RPC requests from stdin and writes responses to stdout.
 
+See [examples/](examples/) for more.
+
 ## Multiple results and different formats
 
 By default TinyMCP assumes you're returning `text` from your call function. If you want to return image, audio, or a bunch of different results, wrap your return value in an array, and TinyMCP will treat your return value as the whole `content` body.
