@@ -46,7 +46,6 @@ module TinyMcp
       # Write the file
       create_file tool_path, template_content
       
-      say_status :create, "Created new MCP tool at #{tool_path}", :green
       say "\nTo use this tool, edit the file with your implementation.", :green
       say "Then you can serve your MCP tools with: rake tiny_mcp:serve", :green
     end
