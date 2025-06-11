@@ -58,6 +58,28 @@ The server reads JSON-RPC requests from stdin and writes responses to stdout.
 
 See [examples/](examples/) for more.
 
+## Rails Integration
+
+TinyMCP can be easily integrated with Rails applications. When you include TinyMCP in a Rails app, it automatically adds Rails-specific functionality.
+
+To use TinyMCP with Rails:
+
+```bash
+# Add to your Gemfile
+gem 'tiny_mcp'
+
+# Generate the Rails integration
+rails generate tiny_mcp:install
+```
+
+This sets up:
+
+- An MCP controller to handle requests in your Rails app
+- A directory for your MCP tools
+- Rake tasks for managing tools
+
+See [Rails Integration Documentation](lib/tiny_mcp/rails/README.md) for details.
+
 ## Multiple results and different formats
 
 By default TinyMCP assumes you're returning `text` from your call function. If you want to return image, audio, or a bunch of different results, wrap your return value in an array, and TinyMCP will treat your return value as the whole `content` body.
