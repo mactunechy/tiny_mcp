@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Load ActiveRecord tasks if ActiveRecord is defined
+load 'tiny_mcp/rails/tasks/active_record.rake' if defined?(ActiveRecord)
+
 namespace :tiny_mcp do
   desc 'Serve MCP tools from your Rails application'
   task serve: :environment do

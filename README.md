@@ -78,7 +78,28 @@ This sets up:
 - A directory for your MCP tools
 - Rake tasks for managing tools
 
-See [Rails Integration Documentation](lib/tiny_mcp/rails/README.md) for details.
+### ActiveRecord Integration
+
+TinyMCP provides a simple DSL to expose your ActiveRecord models safely to AI tools:
+
+```ruby
+class User < ApplicationRecord
+  # Make this model available as a read-only tool
+  expose_mcp :read_only, limit: 50, only: [:id, :name, :email]
+ end
+```
+
+You can also generate tools for multiple models at once:
+
+```bash
+# Expose specific models
+rails generate tiny_mcp:active_record User Post Comment
+
+# Expose all models
+rails generate tiny_mcp:active_record
+```
+
+See [Rails Integration Documentation](lib/tiny_mcp/rails/README.md) for more details.
 
 ## Multiple results and different formats
 
