@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require 'tiny_mcp'
+require 'tiny_mcp/rails/active_record' if defined?(ActiveRecord)
+require 'tiny_mcp/rails/read_only' if defined?(ActiveRecord)
 
 module TinyMCP
   module Rails
+    # Hold registered tools for models
+    mattr_accessor :mcp_tools
+    self.mcp_tools = []
     # Rails integration for TinyMCP
     class Railtie < ::Rails::Railtie
       # Add Rake tasks when railtie is loaded
@@ -60,7 +65,17 @@ module TinyMCP
 
   # Add a method to TinyMCP module to serve tools from a Rails app
   def self.serve_rails(*tools, **kwargs)
-    tools = Rails.load_tools if tools.empty?
+    if tools.empty?
+      # Load regular tools from app/mcp_tools directory
+      tools = Rails.load_tools
+      
+      # Add any exposed model tools if available
+      if defined?(Rails::ActiveRecord) && Rails::ActiveRecord.respond_to?(:create_tools)
+        model_tools = Rails::ActiveRecord.create_tools
+        tools.concat(model_tools) if model_tools.any?
+      end
+    end
+    
     serve(*tools, **kwargs)
   end
 end

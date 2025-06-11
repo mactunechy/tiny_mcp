@@ -62,6 +62,68 @@ You can also use the MCP controller that was created during installation to hand
 
 Since your tools are part of your Rails app, you can use all Rails features, such as ActiveRecord, ActionView, etc. in your tools.
 
+## Exposing ActiveRecord Models
+
+TinyMCP provides a simple way to expose your ActiveRecord models for read-only operations in AI assistants, which is useful for safely querying data without risking memory issues or excessive token usage.
+
+### Manually Adding the DSL
+
+To expose a model, add the `expose_mcp` macro to your model class:
+
+```ruby
+class User < ApplicationRecord
+  # Expose this model with read-only operations
+  expose_mcp :read_only, 
+             limit: 50,  # Maximum records to return
+             only: [:id, :name, :email],  # Only include these fields
+             skip_large_fields: true  # Skip large text/binary fields
+             
+  # ... rest of your model ...
+end
+```
+
+This will create a TinyMCP tool called `user_query` that can be used to query the User model with these operations:
+- `find`: Find a record by ID
+- `find_by`: Find a record by attributes
+- `where`: Find records matching conditions
+- `first`: Get the first record
+- `last`: Get the last record
+- `count`: Count records matching criteria
+
+### Using the Generator
+
+You can also use the generator to expose models:
+
+```bash
+# Expose specific models
+rails generate tiny_mcp:active_record User Post Comment
+
+# Expose all models
+rails generate tiny_mcp:active_record
+```
+
+Or use rake tasks:
+
+```bash
+# Expose specific models
+rake tiny_mcp:activerecord:expose[User,Post,Comment]
+
+# Expose all models
+rake tiny_mcp:activerecord:expose_all
+
+# List exposed models
+rake tiny_mcp:activerecord:list
+```
+
+### Options
+
+The `expose_mcp` macro accepts these options:
+
+- `limit`: Maximum number of records to return (default: 100)
+- `only`: Array of fields to include (whitelist)
+- `except`: Array of fields to exclude (blacklist)
+- `skip_large_fields`: Automatically skip text and binary fields (default: true)
+
 Example of an MCP tool that uses ActiveRecord:
 
 ```ruby
