@@ -17,7 +17,7 @@ module TinyMCP
         def generate_exposure
           if models.empty?
             # Get all models if none specified
-            Rails.application.eager_load!
+            ::Rails.application.eager_load!
             model_classes = ActiveRecord::Base.descendants.reject { |c| c.abstract_class? }
             expose_models(model_classes)
           else
@@ -55,7 +55,7 @@ module TinyMCP
         end
         
         def model_path(model_class)
-          Rails.root.join('app', 'models', "#{model_class.name.underscore}.rb")
+          ::Rails.application.root.join('app', 'models', "#{model_class.name.underscore}.rb")
         end
         
         def build_options_string
@@ -87,7 +87,7 @@ module TinyMCP
             # frozen_string_literal: true
             
             # Create TinyMCP tools for exposed ActiveRecord models
-            Rails.application.config.after_initialize do
+            ::Rails.application.config.after_initialize do
               # Create the tools when ActiveRecord models are loaded
               model_tools = TinyMCP::Rails::ActiveRecord.create_tools
               
