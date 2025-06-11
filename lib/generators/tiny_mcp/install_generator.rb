@@ -14,16 +14,12 @@ module TinyMcp
       
       # Copy the controller template
       template 'controller_template.rb', 'app/controllers/mcp_controller.rb'
-      
-      puts "Created MCP controller at app/controllers/mcp_controller.rb"
     end
     
     def create_tools_directory
       # Create tools directory
       tools_path = 'app/mcp_tools'
       FileUtils.mkdir_p(tools_path) unless File.directory?(tools_path)
-      
-      puts "Created MCP tools directory at #{tools_path}"
     end
     
     def add_routes
@@ -34,7 +30,6 @@ module TinyMcp
         puts "Route already exists"
       else
         route route_code
-        puts "Added MCP route: #{route_code}"
       end
     end
     
