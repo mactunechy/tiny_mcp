@@ -4,6 +4,9 @@ require 'tiny_mcp/version'
 require 'json'
 require 'shellwords'
 
+# Load Rails integration if Rails is defined
+require 'tiny_mcp/rails' if defined?(Rails)
+
 module TinyMCP
   Prop = Data.define(:name, :type, :desc, :req) do
     def to_h = { type: type, description: desc }

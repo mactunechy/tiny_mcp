@@ -26,6 +26,9 @@ Gem::Specification.new do |spec|
         (f == gemspec) || f.start_with?(*%w[bin/ test/ .git .github Gemfile])
       }
     }
+    
+  # Add development dependencies
+  spec.add_development_dependency 'rails', '~> 6.1'
 
   spec.require_paths = ['lib']
 end
