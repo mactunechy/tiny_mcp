@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'rails/generators'
+require 'tiny_mcp/rails/generators/active_record_generator'
+
 namespace :tiny_mcp do
   namespace :activerecord do
     desc "Expose a model to TinyMCP for read-only operations"

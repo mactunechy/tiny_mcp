@@ -5,7 +5,14 @@ require 'json'
 require 'shellwords'
 
 # Load Rails integration if Rails is defined
-require 'tiny_mcp/rails' if defined?(Rails)
+if defined?(Rails)
+  require 'tiny_mcp/rails'
+  
+  # Load the generators
+  if defined?(Rails::Generators)
+    require 'generators/tiny_mcp/active_record/active_record_generator'
+  end
+end
 
 module TinyMCP
   Prop = Struct.new(:name, :type, :desc, :req) do

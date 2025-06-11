@@ -1,8 +1,16 @@
 # frozen_string_literal: true
 
 require 'tiny_mcp'
-require 'tiny_mcp/rails/active_record' if defined?(ActiveRecord)
-require 'tiny_mcp/rails/read_only' if defined?(ActiveRecord)
+
+# Load the ActiveRecord integration if ActiveRecord is defined
+if defined?(ActiveRecord)
+  require 'tiny_mcp/rails/active_record'
+  require 'tiny_mcp/rails/read_only'
+  
+  # Load the generators
+  require 'rails/generators'
+  require 'tiny_mcp/rails/generators/active_record_generator' if defined?(Rails::Generators)
+end
 
 module TinyMCP
   module Rails
