@@ -8,7 +8,7 @@ require 'shellwords'
 require 'tiny_mcp/rails' if defined?(Rails)
 
 module TinyMCP
-  Prop = Data.define(:name, :type, :desc, :req) do
+  Prop = Struct.new(:name, :type, :desc, :req) do
     def to_h = { type: type, description: desc }
   end
 
