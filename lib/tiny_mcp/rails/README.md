@@ -102,18 +102,22 @@ rails generate tiny_mcp:active_record User Post Comment
 rails generate tiny_mcp:active_record
 ```
 
-Or use rake tasks:
+The generator will:
+1. Add the `expose_mcp :read_only` directive to each model
+2. Create an initializer that registers dynamic tools for these models
+3. Generate explicit tool files in `app/mcp_tools` for each model
+
+If you want to generate only the tool files for already exposed models, you can use:
 
 ```bash
-# Expose specific models
-rake tiny_mcp:activerecord:expose[User,Post,Comment]
+# Generate tool files for specific exposed models
+rails generate tiny_mcp:model_tool User Post Comment
 
-# Expose all models
-rake tiny_mcp:activerecord:expose_all
-
-# List exposed models
-rake tiny_mcp:activerecord:list
+# Generate tool files for all exposed models
+rails generate tiny_mcp:model_tool
 ```
+
+Each generated tool file will include implementations for all the read-only operations mentioned above.
 
 ### Options
 

@@ -9,7 +9,10 @@ if defined?(ActiveRecord)
   
   # Load the generators
   require 'rails/generators'
-  require 'tiny_mcp/rails/generators/active_record_generator' if defined?(Rails::Generators)
+  if defined?(Rails::Generators)
+    require 'tiny_mcp/rails/generators/active_record_generator'
+    require 'tiny_mcp/rails/generators/model_tool_generator'
+  end
 end
 
 module TinyMCP

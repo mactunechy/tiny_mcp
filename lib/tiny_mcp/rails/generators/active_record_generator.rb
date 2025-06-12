@@ -97,6 +97,9 @@ module TinyMCP
               TinyMCP::Rails.mcp_tools.concat(model_tools)
             end
           RUBY
+          
+          # Also generate explicit tool files for each model
+          generate "tiny_mcp:model_tool"
         end
       end
     end
