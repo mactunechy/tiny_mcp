@@ -107,6 +107,8 @@ The generator will:
 2. Create an initializer that registers dynamic tools for these models
 3. Generate explicit tool files in `app/mcp_tools` for each model
 
+The tool files follow Rails naming conventions. For example, a tool for the `User` model would be named `user_query.rb` and define a class called `UserQuery`.
+
 If you want to generate only the tool files for already exposed models, you can use:
 
 ```bash

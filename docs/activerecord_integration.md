@@ -91,7 +91,7 @@ assistant calls user_query with operation=count
 
 ## Sample Implementation
 
-You can find a sample implementation of a generated tool in `/examples/user_query_tool.rb`.
+You can find a sample implementation of a generated tool in `/examples/user_query_tool.rb`. Note that the class name follows Rails naming conventions, so a tool for the `User` model would have the class name `UserQuery` (not `UserQueryTool`).
 
 ## Troubleshooting
 

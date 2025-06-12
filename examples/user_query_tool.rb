@@ -4,7 +4,7 @@
 # This shows how all the read-only operations are implemented
 
 # Tool for querying the User model
-class UserQueryTool < TinyMCP::Tool
+class UserQuery < TinyMCP::Tool
   name 'user_query'
   desc 'Query the User model with read-only operations'
   

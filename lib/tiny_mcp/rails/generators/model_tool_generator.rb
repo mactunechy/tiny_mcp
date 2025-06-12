@@ -57,7 +57,7 @@ module TinyMCP
             # frozen_string_literal: true
 
             # Tool for querying the #{model_class.name} model
-            class #{model_class.name}QueryTool < TinyMCP::Tool
+            class #{tool_name.camelize} < TinyMCP::Tool
               name '#{tool_name}'
               desc 'Query the #{model_class.name} model with read-only operations'
               
