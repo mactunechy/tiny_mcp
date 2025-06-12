@@ -39,7 +39,14 @@ module TinyMCP
           end
           
           # Create initializer to create tools for exposed models
-          create_initializer if model_classes.any?
+          if model_classes.any?
+            create_initializer
+            
+            # Generate explicit tool files
+            model_classes.each do |model_class|
+              create_tool_file(model_class)
+            end
+          end
         end
         
         def expose_model(model_class)
